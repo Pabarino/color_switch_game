@@ -18,6 +18,8 @@ class MyGame extends FlameGame with TapCallbacks, HasCollisionDetection, HasDeco
 
   final ValueNotifier<int> currentScore = ValueNotifier(0);
 
+  final List<PositionComponent> _gameComponents = [];
+
   MyGame({this.GameColors = const [
     Colors.redAccent,
     Colors.greenAccent,
@@ -51,7 +53,7 @@ class MyGame extends FlameGame with TapCallbacks, HasCollisionDetection, HasDeco
   void update(double dt) {
     final cameraY = camera.viewfinder.position.y;
     final playerY = myPlayer.position.y;
-
+    
     if (playerY < cameraY) {
       camera.viewfinder.position = Vector2(0, playerY); 
     }
@@ -66,25 +68,49 @@ class MyGame extends FlameGame with TapCallbacks, HasCollisionDetection, HasDeco
     super.onTapDown(event);
   }
 
+  void _addComponentToTheGame(PositionComponent component) {
+    _gameComponents.add(component);
+    world.add(component);
+  }
+
   _initializaGame() {
     currentScore.value = 0;
     world.add(Ground(position: Vector2(0, 400)));
     world.add(myPlayer = Player(position: Vector2(0, 250)));
     camera.moveTo(Vector2(0, 0));
-    _generateGameComponents();
+    _generateGameComponents(Vector2(0, 20));
     FlameAudio.bgm.play('background.mp3');
   }
 
-  void _generateGameComponents(){ 
-    world.add(ColorSwitcher(position: Vector2(0, 200))); 
-    world.add(CircleRotator(position: Vector2(0,0), size: Vector2.all(200)));
-    world.add(StarComponent(position: Vector2(0, 0))); 
+  void _generateGameComponents(Vector2 generateFromPosition) {
+    _addComponentToTheGame(ColorSwitcher(position: generateFromPosition + Vector2(0, 180))); 
+    _addComponentToTheGame(CircleRotator(position: generateFromPosition + Vector2(0,0), size: Vector2.all(200)));
+    _addComponentToTheGame(StarComponent(position: generateFromPosition + Vector2(0,0)));
 
-    world.add(ColorSwitcher(position: Vector2(0, -200))); 
-    world.add(CircleRotator(position: Vector2(0,-400), size: Vector2.all(150)));
-    world.add(CircleRotator(position: Vector2(0,-400), size: Vector2.all(180)));
-    world.add(StarComponent(position: Vector2(0, -400))); 
+    generateFromPosition -= Vector2(0, 370);  
+
+    _addComponentToTheGame(ColorSwitcher(position: generateFromPosition + Vector2(0, 180))); 
+    _addComponentToTheGame(CircleRotator(position: generateFromPosition + Vector2(0,0), size: Vector2.all(200)));
+    _addComponentToTheGame(StarComponent(position: generateFromPosition + Vector2(0,0))); 
+
+    generateFromPosition -= Vector2(0, 240);  
+
+    _addComponentToTheGame(ColorSwitcher(position: generateFromPosition + Vector2(0, 0))); 
+    _addComponentToTheGame(CircleRotator(position: generateFromPosition + Vector2(0,-200), size: Vector2.all(150)));
+    _addComponentToTheGame(CircleRotator(position: generateFromPosition + Vector2(0,-200), size: Vector2.all(180)));
+    _addComponentToTheGame(StarComponent(position: generateFromPosition + Vector2(0, -200)));    
   }
+
+  // void _generateGameComponents(){ 
+  //   world.add(ColorSwitcher(position: Vector2(0, 200))); 
+  //   world.add(CircleRotator(position: Vector2(0,0), size: Vector2.all(200)));
+  //   world.add(StarComponent(position: Vector2(0, 0))); 
+
+  //   world.add(ColorSwitcher(position: Vector2(0, -200))); 
+  //   world.add(CircleRotator(position: Vector2(0,-400), size: Vector2.all(150)));
+  //   world.add(CircleRotator(position: Vector2(0,-400), size: Vector2.all(180)));
+  //   world.add(StarComponent(position: Vector2(0, -400))); 
+  // }
 
   void gameOver() {
     FlameAudio.bgm.stop();
@@ -109,5 +135,35 @@ class MyGame extends FlameGame with TapCallbacks, HasCollisionDetection, HasDeco
   
   void increaseScore() {
     currentScore.value++;
+  }
+
+  void checkToGenerateNextBatch(StarComponent starComponent) {
+    final allStarComponents = _gameComponents.whereType<StarComponent>().toList();
+    final length = allStarComponents.length;
+    for (int i = 0; i<length; i++) {
+      if (starComponent == allStarComponents[i] && i >= length-2) {
+        //Generate the next batch
+        final lastStar = allStarComponents.last;
+        _generateGameComponents(lastStar.position - Vector2(0,400));
+        _tryToGarbageCollect(starComponent);
+      }
+    }
+  }
+  
+  void _tryToGarbageCollect(StarComponent starComponent) {
+    final length = _gameComponents.length;
+    for (int i = 0; i<length; i++) {
+      if (starComponent == _gameComponents[i] && i >= 15) {
+        _removeComponentsFromGame(i-7);
+        break;
+      }
+    }
+  }
+
+  void _removeComponentsFromGame (int n) {
+    for(int i = n; i>=0;i--) {
+      _gameComponents[i].removeFromParent();
+      _gameComponents.removeAt(i);
+    }
   }
 }

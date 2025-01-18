@@ -76,6 +76,7 @@ class Player extends PositionComponent with HasGameRef<MyGame>, CollisionCallbac
       other.showCollectEffect();
       gameRef.increaseScore();
       FlameAudio.play('collect.wav');
+      gameRef.checkToGenerateNextBatch(other);
     }
   }
 
