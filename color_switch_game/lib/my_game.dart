@@ -5,7 +5,9 @@ import 'package:color_switch_game/player.dart';
 import 'package:color_switch_game/star_component.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
+import 'package:flame/flame.dart';
 import 'package:flame/rendering.dart';
+import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter/material.dart';
 import 'package:flame/game.dart';
 
@@ -30,9 +32,12 @@ class MyGame extends FlameGame with TapCallbacks, HasCollisionDetection, HasDeco
   Color backgroundColor() => const Color(0xff222222);
 
   @override
-  void onLoad() {
+  Future<void> onLoad() async{
+    await super.onLoad();
     decorator = PaintDecorator.blur(0);
-    super.onLoad();
+    FlameAudio.bgm.initialize();
+    await Flame.images.loadAll(['finger_tap.png','star_icon.png']);
+    await FlameAudio.audioCache.loadAll(['background.mp3','collect.wav']);
   }
 
   @override
@@ -56,7 +61,7 @@ class MyGame extends FlameGame with TapCallbacks, HasCollisionDetection, HasDeco
 
   @override
   void onTapDown(TapDownEvent event) {
-    print('onTapDown()');
+    //print('onTapDown()');
     myPlayer.jump();
     super.onTapDown(event);
   }
@@ -66,7 +71,8 @@ class MyGame extends FlameGame with TapCallbacks, HasCollisionDetection, HasDeco
     world.add(Ground(position: Vector2(0, 400)));
     world.add(myPlayer = Player(position: Vector2(0, 250)));
     camera.moveTo(Vector2(0, 0));
-    _generateGameComponents() ;
+    _generateGameComponents();
+    FlameAudio.bgm.play('background.mp3');
   }
 
   void _generateGameComponents(){ 
@@ -81,6 +87,7 @@ class MyGame extends FlameGame with TapCallbacks, HasCollisionDetection, HasDeco
   }
 
   void gameOver() {
+    FlameAudio.bgm.stop();
     for (var element in world.children) {element.removeFromParent();}
     _initializaGame();
   }
@@ -91,11 +98,13 @@ class MyGame extends FlameGame with TapCallbacks, HasCollisionDetection, HasDeco
   void pauseGame() {
     (decorator as PaintDecorator).addBlur(8);
     timeScale = 0.0;
+    FlameAudio.bgm.pause();
   }
 
   void resumeGame() {
     (decorator as PaintDecorator).addBlur(0);
     timeScale = 1.0;
+    FlameAudio.bgm.resume();
   }
   
   void increaseScore() {

@@ -9,6 +9,7 @@ class ColorSwitcher extends PositionComponent with HasGameRef<MyGame>, Collision
   ColorSwitcher({required super.position, this.radius = 20}) : super(anchor: Anchor.center, size: Vector2.all(radius*2));
 
   final double radius;
+  final _paint = Paint();
 
   @override
   void onLoad() {
@@ -21,7 +22,7 @@ class ColorSwitcher extends PositionComponent with HasGameRef<MyGame>, Collision
     final length = gameRef.GameColors.length;
     final sweepAngle = (math.pi*2)/length;
     for (int i = 0;i < gameRef.GameColors.length; i++){
-      canvas.drawArc(size.toRect(), i* sweepAngle, sweepAngle, true, Paint()..color = gameRef.GameColors[i]);
+      canvas.drawArc(size.toRect(), i* sweepAngle, sweepAngle, true, _paint..color = gameRef.GameColors[i]);
     }    
   }
 }

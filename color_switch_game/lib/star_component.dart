@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 class StarComponent extends PositionComponent {
   late Sprite _starSprite;
 
+  final _particlePain = Paint();
+
   StarComponent({
     required super.position
   }): super (size: Vector2(28,28), anchor: Anchor.center);
@@ -38,7 +40,7 @@ class StarComponent extends PositionComponent {
         position: position,
         particle: Particle.generate(
           count: 30,
-          lifespan: 1,
+          lifespan: 0.8,
           generator: (i) {
             return AcceleratedParticle(
               speed: randomVector2(),
@@ -48,9 +50,9 @@ class StarComponent extends PositionComponent {
                 child: ComputedParticle(renderer: (canvas,particle) {
                   _starSprite.render(
                     canvas, 
-                    size: (size/2) * (1-particle.progress), 
+                    size: size * (1-particle.progress), 
                     anchor: Anchor.center,
-                    overridePaint: Paint()..color = Colors.white.withOpacity(
+                    overridePaint: _particlePain..color = Colors.white.withOpacity(
                       1-particle.progress
                     ));
                 })

@@ -31,6 +31,8 @@ class CircleArc extends PositionComponent with ParentIsA<CircleRotator> {
   final double startAngle;
   final double sweepAngle;
 
+  final _arcPaint = Paint();
+
   CircleArc({required this.color, required this.startAngle, required this.sweepAngle}): super(anchor: Anchor.center);
 
   @override
@@ -64,6 +66,6 @@ class CircleArc extends PositionComponent with ParentIsA<CircleRotator> {
 
   @override
   void render(Canvas canvas) {
-    canvas.drawArc(size.toRect().deflate(parent.thickness/2), startAngle, sweepAngle, false, Paint()..color = color..style = PaintingStyle.stroke..strokeWidth = parent.thickness);
+    canvas.drawArc(size.toRect().deflate(parent.thickness/2), startAngle, sweepAngle, false, _arcPaint..color = color..style = PaintingStyle.stroke..strokeWidth = parent.thickness);
   }
 }
