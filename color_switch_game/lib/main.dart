@@ -35,7 +35,8 @@ class _HomePageState extends State<HomePage> {
           if(_myGame.isGamePlaying)
             Align(
               alignment: Alignment.topLeft,
-              child: IconButton(
+              child: Row(children: [
+                IconButton(
                 onPressed: () {
                   setState(() {
                     _myGame.pauseGame();                    
@@ -43,6 +44,15 @@ class _HomePageState extends State<HomePage> {
                 }, 
                 icon: const Icon(Icons.pause)
               ),
+              ValueListenableBuilder(valueListenable: _myGame.currentScore, builder: (context, value, child) {
+                return 
+                Text(
+                  value.toString(), style: const TextStyle(
+                  fontSize: 24, 
+                  fontWeight: FontWeight.bold
+                ));
+              })
+              ],),
             ),
           if(_myGame.isGamePaused)
             Container( 
